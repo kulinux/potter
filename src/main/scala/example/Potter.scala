@@ -7,60 +7,39 @@ object Potter {
     totalPrice * (1 - calculateDiscount(books.distinct.size))
   }
 
+  def contains(s: Seq[Int], ele: Int, r1: Int, r2: Int) = {
+   s.contains(ele) match {
+     case true => r1
+     case false => r2
+   }
+  }
 
-
-  def price(books : Seq[Int]) : Double = {
-    if(books.size == 0) 0.0
-    val distinctBooks = books.distinct
-    val booksAndCount = distinctBooks.map( x => (x, books.filter(_ == x).size ) )
-
-    val distinct = booksAndCount
-      .map( (x) => (x._1, x._2 - 1) )
-      .filter( x => x._2 >= 0)
-      .map( x => x._1 )
-
-    val onRound = priceOld(distinct)
-
-    val rest = books.filter( x => distinct.contains(x))
-
-    onRound + price(rest)
-    /*
-
-    val priceBooksWithoutDiscount = distinct * 8
-
-    val totalPrice = (books - distinctBooks).foldLeft(0.0)((a, b) => (a + 8)  )
-
-    priceBooksWithoutDiscount + (totalPrice * (1 - calculateDiscount(books.distinct.size)))
-    */
-
+  def priceMap(booksAndCount : Map[Int, Int]) : Tuple2[Double, Map[Int, Int]] = {
+    val round1 : Seq[Int] = booksAndCount.filter(p => p._2 > 0).keys.toSeq
+    val price = priceOld(round1)
+    val rest = booksAndCount.map(x => (x._1, contains(round1, x._1,  x._2 - 1, x._2)))
+    (price, rest)
   }
 
 
   def price(books : Seq[Int]) : Double = {
-    if(books.size == 0) 0.0
-    val distinctBooks = books.distinct
-    val booksAndCount = distinctBooks.map( x => (x, books.filter(_ == x).size ) )
 
-    val distinct = booksAndCount
-      .map( (x) => (x._1, x._2 - 1) )
-      .filter( x => x._2 >= 0)
-      .map( x => x._1 )
+    val booksAndCount = books.groupBy(identity).mapValues(_.size)
 
-    val onRound = priceOld(distinct)
+    val r1 = priceMap(booksAndCount)
+    val r2 = priceMap(r1._2)
+    val r3 = priceMap(r2._2)
+    val r4 = priceMap(r3._2)
+    val r5 = priceMap(r4._2)
+    val r6 = priceMap(r5._2)
+    val r7 = priceMap(r6._2)
+    val r8 = priceMap(r7._2)
 
-    val rest = books.filter( x => distinct.contains(x))
-
-    onRound + price(rest)
-    /*
-
-    val priceBooksWithoutDiscount = distinct * 8
-
-    val totalPrice = (books - distinctBooks).foldLeft(0.0)((a, b) => (a + 8)  )
-
-    priceBooksWithoutDiscount + (totalPrice * (1 - calculateDiscount(books.distinct.size)))
-    */
-
+    r1._1 + r2._1 + r3._1 + r4._1 +
+      r5._1 + r6._1 + r7._1 + r8._1
   }
+
+
 
   def calculateDiscount (distinctBooks: Int): Double  = {
     distinctBooks match {
